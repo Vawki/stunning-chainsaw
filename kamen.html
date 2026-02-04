@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Камень-Ножницы-Бумага</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .choices {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .choice-btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .choice-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .rock { background: linear-gradient(45deg, #FF6B6B, #FF8E53); }
+        .paper { background: linear-gradient(45deg, #4ECDC4, #44A08D); }
+        .scissors { background: linear-gradient(45deg, #FFD93D, #FF9F1A); }
+        
+        .result {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+            min-height: 60px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            width: 100%;
+        }
+        
+        .timer {
+            font-size: 1.2em;
+            color: #FFD93D;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .score {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .score-box {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            width: 30%;
+        }
+        
+        .score-box h3 {
+            margin-bottom: 10px;
+            color: #FFD93D;
+        }
+        
+        .score-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .leaderboard h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFD93D;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        th {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .player-you {
+            background: rgba(76, 175, 80, 0.2);
+            font-weight: bold;
+        }
+        
+        .emoji {
+            font-size: 1.5em;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .choices {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .choice-btn {
+                width: 100%;
+            }
+            
+            .score {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .score-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Камень-Ножницы-Бумага</h1>
+        
+        <div class="game-area">
+            <div class="score">
+                <div class="score-box">
+                    <h3>Ваши победы</h3>
+                    <div class="score-number" id="wins">0</div>
+                </div>
+                <div class="score-box">
+                    <h3>Ничьи</h3>
+                    <div class="score-number" id="draws">0</div>
+                </div>
+                <div class="score-box">
+                    <h3>Поражения</h3>
+                    <div class="score-number" id="losses">0</div>
+                </div>
+            </div>
+            
+            <div class="choices">
+                <button class="choice-btn rock" onclick="playGame('rock')" id="rockBtn">
+                    ✊ Камень
+                </button>
+                <button class="choice-btn paper" onclick="playGame('paper')" id="paperBtn">
+                    ✋ Бумага
+                </button>
+                <button class="choice-btn scissors" onclick="playGame('scissors')" id="scissorsBtn">
+                    ✌️ Ножницы
+                </button>
+            </div>
+            
+            <div class="result" id="result">
+                Выберите свой ход!
+            </div>
+            
+            <div class="timer" id="timer">
+                Можно играть сейчас!
+            </div>
+        </div>
+        
+        <div class="leaderboard">
+            <h2>🏆 Таблица лидеров</h2>
+            <table id="leaderboard">
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Игрок</th>
+                        <th>Побед</th>
+                        <th>Ничьих</th>
+                        <th>Поражений</th>
+                        <th>Последняя игра</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Данные будут заполняться JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация переменных
+        let wins = 0;
+        let draws = 0;
+        let losses = 0;
+        let canPlay = true;
+        let lastPlayTime = null;
+        const COOLDOWN_MINUTES = 40;
+        let countdownInterval = null;
+
+        // Инициализация данных из localStorage
+        function initGame() {
+            wins = parseInt(localStorage.getItem('rps_wins')) || 0;
+            draws = parseInt(localStorage.getItem('rps_draws')) || 0;
+            losses = parseInt(localStorage.getItem('rps_losses')) || 0;
+            lastPlayTime = localStorage.getItem('rps_lastPlay');
+            
+            updateScores();
+            updateLeaderboard();
+            
+            // Проверяем, можно ли играть
+            if (lastPlayTime) {
+                checkCooldown();
+            }
+        }
+
+        // Функция игры
+        function playGame(playerChoice) {
+            if (!canPlay) {
+                return;
+            }
+            
+            // Отключаем кнопки
+            canPlay = false;
+            document.getElementById('rockBtn').disabled = true;
+            document.getElementById('paperBtn').disabled = true;
+            document.getElementById('scissorsBtn').disabled = true;
+            
+            // Выбор компьютера
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            
+            // Определяем результат
+            let resultText = '';
+            let resultEmoji = '';
+            
+            if (playerChoice === computerChoice) {
+                draws++;
+                resultText = 'Ничья!';
+                resultEmoji = '🤝';
+            } else if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper')
+            ) {
+                wins++;
+                resultText = 'Вы победили!';
+                resultEmoji = '🎉';
+            } else {
+                losses++;
+                resultText = 'Вы проиграли!';
+                resultEmoji = '😢';
+            }
+            
+            // Обновляем интерфейс
+            updateScores();
+            document.getElementById('result').innerHTML = `
+                Вы выбрали: ${getChoiceEmoji(playerChoice)}<br>
+                Компьютер выбрал: ${getChoiceEmoji(computerChoice)}<br>
+                <strong>${resultText} ${resultEmoji}</strong>
+            `;
+            
+            // Сохраняем время игры
+            lastPlayTime = new Date().toISOString();
+            localStorage.setItem('rps_lastPlay', lastPlayTime);
+            localStorage.setItem('rps_wins', wins);
+            localStorage.setItem('rps_draws', draws);
+            localStorage.setItem('rps_losses', losses);
+            
+            // Обновляем таблицу лидеров
+            updateLeaderboard();
+            
+            // Запускаем таймер
+            startCooldownTimer();
+        }
+
+        // Функция для получения эмодзи
+        function getChoiceEmoji(choice) {
+            switch(choice) {
+                case 'rock': return '✊ Камень';
+                case 'paper': return '✋ Бумага';
+                case 'scissors': return '✌️ Ножницы';
+                default: return '';
+            }
+        }
+
+        // Обновление счетчиков
+        function updateScores() {
+            document.getElementById('wins').textContent = wins;
+            document.getElementById('draws').textContent = draws;
+            document.getElementById('losses').textContent = losses;
+        }
+
+        // Проверка кулдауна
+        function checkCooldown() {
+            if (!lastPlayTime) return;
+            
+            const now = new Date();
+            const lastPlay = new Date(lastPlayTime);
+            const diffMinutes = (now - lastPlay) / (1000 * 60);
+            
+            if (diffMinutes < COOLDOWN_MINUTES) {
+                canPlay = false;
+                document.getElementById('rockBtn').disabled = true;
+                document.getElementById('paperBtn').disabled = true;
+                document.getElementById('scissorsBtn').disabled = true;
+                startCooldownTimer();
+            }
+        }
+
+        // Запуск таймера кулдауна
+        function startCooldownTimer() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            countdownInterval = setInterval(() => {
+                if (!lastPlayTime) return;
+                
+                const now = new Date();
+                const lastPlay = new Date(lastPlayTime);
+                const diffMs = now - lastPlay;
+                const diffMinutes = diffMs / (1000 * 60);
+                const remainingMinutes = COOLDOWN_MINUTES - diffMinutes;
+                
+                if (remainingMinutes <= 0) {
+                    // Кулдаун закончился
+                    canPlay = true;
+                    document.getElementById('rockBtn').disabled = false;
+                    document.getElementById('paperBtn').disabled = false;
+                    document.getElementById('scissorsBtn').disabled = false;
+                    document.getElementById('timer').textContent = 'Можно играть сейчас!';
+                    clearInterval(countdownInterval);
+                } else {
+                    // Показываем оставшееся время
+                    const minutes = Math.floor(remainingMinutes);
+                    const seconds = Math.floor((remainingMinutes - minutes) * 60);
+                    document.getElementById('timer').textContent = 
+                        `Следующая игра через: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // Обновление таблицы лидеров (симуляция данных других игроков)
+        function updateLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboardBody');
+            
+            // Данные других игроков (в реальном приложении брались бы с сервера)
+            const otherPlayers = [
+                { name: "Игрок1", wins: 15, draws: 3, losses: 5, lastPlay: "2 минуты назад" },
+                { name: "Про_Геймер", wins: 12, draws: 8, losses: 10, lastPlay: "15 минут назад" },
+                { name: "Новичок", wins: 5, draws: 2, losses: 8, lastPlay: "1 час назад" },
+                { name: "Чемпион", wins: 25, draws: 4, losses: 6, lastPlay: "30 минут назад" },
+                { name: "Удача", wins: 8, draws: 10, losses: 7, lastPlay: "45 минут назад" },
+                { name: "ВЫ", wins: wins, draws: draws, losses: losses, lastPlay: "только что", isYou: true }
+            ];
+            
+            // Сортируем по количеству побед
+            otherPlayers.sort((a, b) => b.wins - a.wins);
+            
+            // Генерируем таблицу
+            leaderboardBody.innerHTML = '';
+            
+            otherPlayers.forEach((player, index) => {
+                const row = document.createElement('tr');
+                if (player.isYou) {
+                    row.className = 'player-you';
+                }
+                
+                const lastPlayText = player.isYou ? 
+                    (canPlay ? 'только что' : 'ожидание...') : 
+                    player.lastPlay;
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${player.name}</td>
+                    <td>${player.wins}</td>
+                    <td>${player.draws}</td>
+                    <td>${player.losses}</td>
+                    <td>${lastPlayText}</td>
+                `;
+                
+                leaderboardBody.appendChild(row);
+            });
+        }
+
+        // Инициализация игры при загрузке страницы
+        window.onload = function() {
+            initGame();
+            
+            // Обновляем таблицу лидеров каждые 30 секунд
+            setInterval(updateLeaderboard, 30000);
+        };
+
+        // Сохраняем статистику при закрытии страницы
+        window.onbeforeunload = function() {
+            localStorage.setItem('rps_wins', wins);
+            localStorage.setItem('rps_draws', draws);
+            localStorage.setItem('rps_losses', losses);
+        };
+    </script>
+</body>
+</html>
